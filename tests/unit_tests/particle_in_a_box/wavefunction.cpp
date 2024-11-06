@@ -58,6 +58,19 @@ TEST_CASE("particle_in_a_box::euler_step") {
   }
 }
 
+
+namespace {
+
+template<typename ValueType>
+void check_n_equal_1(const ValueType& value){
+  REQUIRE_THAT(value(0, 0) + 1.0, Catch::WithinRel(1.0, 1.0e-6));
+  REQUIRE_THAT(value(1, 0), Catch::WithinRel(1.224744871391589, 1.0e-6));
+  REQUIRE_THAT(value(2, 0), Catch::WithinRel(1.224744871391589, 1.0e-6));
+  REQUIRE_THAT(value(3, 0) + 1.0, Catch::WithinRel(1.0, 1.0e-6));
+}
+
+}
+
 TEST_CASE("particle_in_a_box::real_space_wavefunction"){
     // N.B. The shift by 1.0 is because the expected value is 0 and Catch2
     // has a hard time with zero comparisons.
@@ -66,24 +79,20 @@ TEST_CASE("particle_in_a_box::real_space_wavefunction"){
     SECTION("L = 1.0"){
         SECTION("n=0"){
             auto value = real_space_wavefunction(0, 1.0, grid);
-            REQUIRE_THAT(value[0] + 1.0, Catch::WithinRel(1.0, 1.0e-6));
-            REQUIRE_THAT(value[1] + 1.0, Catch::WithinRel(1.0, 1.0e-6));
-            REQUIRE_THAT(value[2] + 1.0, Catch::WithinRel(1.0, 1.0e-6));
-            REQUIRE_THAT(value[3] + 1.0, Catch::WithinRel(1.0, 1.0e-6));
+            REQUIRE(value.rows() == 0);
+            REQUIRE(value.cols() == 0);
         }
         SECTION("n=1"){
             auto value = real_space_wavefunction(1, 1.0, grid);
-            REQUIRE_THAT(value[0] + 1.0, Catch::WithinRel(1.0, 1.0e-6));
-            REQUIRE_THAT(value[1], Catch::WithinRel(1.224744871391589, 1.0e-6));
-            REQUIRE_THAT(value[2], Catch::WithinRel(1.224744871391589, 1.0e-6));
-            REQUIRE_THAT(value[3] + 1.0, Catch::WithinRel(1.0, 1.0e-6));
+            check_n_equal_1(value);
         }
         SECTION("n=2"){
             auto value = real_space_wavefunction(2, 1.0, grid);
-            REQUIRE_THAT(value[0] + 1.0, Catch::WithinRel(1.0, 1.0e-6));
-            REQUIRE_THAT(value[1], Catch::WithinRel(1.224744871391589, 1.0e-6));
-            REQUIRE_THAT(value[2], Catch::WithinRel(-1.224744871391589, 1.0e-6));
-            REQUIRE_THAT(value[3] + 1.0, Catch::WithinRel(1.0, 1.0e-6));
+            check_n_equal_1(value);
+            REQUIRE_THAT(value(0, 1) + 1.0, Catch::WithinRel(1.0, 1.0e-6));
+            REQUIRE_THAT(value(1, 1), Catch::WithinRel(1.224744871391589, 1.0e-6));
+            REQUIRE_THAT(value(2, 1), Catch::WithinRel(-1.224744871391589, 1.0e-6));
+            REQUIRE_THAT(value(3, 1) + 1.0, Catch::WithinRel(1.0, 1.0e-6));
         }
     }
 }
